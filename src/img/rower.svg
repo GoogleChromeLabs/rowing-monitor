@@ -1,0 +1,19 @@
+<svg 
+  width="360" 
+  height="360"
+  xmlns="http://www.w3.org/2000/svg">
+  <!-- Rail -->
+  <polyline points="8,225 180,225 270,180" style="fill:none;stroke:black;stroke-width:10"/>
+
+  <!-- Hear foot -->
+  <line x1="11" y1="225" x2="11" y2="270" style="stroke:black;stroke-width:5"/>
+
+  <!-- Monitor -->
+  <polyline points='245,180 225,160 225,150' style="stroke:black;stroke-width:8" /> 
+
+  <!-- Front Feet -->
+  <line x1="245" y1="180" x2="285" y2="270" style="stroke:black;stroke-width:5"/>
+  <line x1="290" y1="180" x2="285" y2="270" style="stroke:black;stroke-width:5"/>  
+
+  <circle cx="270" cy="180" r="24" stroke="black" stroke-width="10" fill="black" />  
+</svg>

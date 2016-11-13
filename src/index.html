@@ -1,0 +1,262 @@
+<!-- 
+ Copyright 2015-2016, Google, Inc.
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License. 
+ -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PM5 Monitor</title>
+    <link rel="manifest" href="/manifest.json">
+    <!--<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">-->
+    <meta name="theme-color" content="#0097A7">    
+    <script async src="js/app.js" type="text/javascript"></script>
+    <style type="text/css">
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        h1 {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        td {
+            text-align: center;
+        }
+        
+        .navigation__items {
+            display: flex;
+            list-style-type: none;
+            padding: 0px 8px;
+            position: absolute;
+            margin: 0px;
+        }
+        
+        .navigation__item {
+            width: 100px;
+            text-align: center;
+            padding: 24px 4px 0px;
+            height: 56px;
+        }
+        
+        .navigation__item_selected {
+            font-weight: bold;
+            border-bottom: 4px solid #CDDC39;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .header {
+            color: white;            
+        }
+
+        .appbar {
+            height: 56px;
+            display: flex;
+            padding: 8px;
+            background-color: #0097A7;
+        }
+        
+        .logo {
+            width: 70%;
+            margin-left: 16px;
+        }
+        
+        .toolbar {
+            background-color: #00BCD4;
+            height: 56px;
+        }
+
+        .status {
+            font-size: 1.5em;
+            display: inline;
+        }
+        
+        button {
+            color: white;
+            background: inherit;
+            border: none;
+            font: inherit;
+        }
+        
+        .metrics {
+            margin: 60px 0px;
+        }
+
+        .metric-box {
+            width: 100%;
+            text-align: center;
+            font-size: 1.0em;
+        }
+
+        .metric-box__metric {
+            font-size: 4.0em;
+        }        
+
+        .page {
+            width: 100%;
+            display: none;
+        }
+
+        .page_active {
+            display: block;
+        }
+
+        .logbook-records {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .no-workout {
+            width: 100%;
+            text-align: center;
+            margin-top: 204px
+        }
+
+        .no-workout_hidden {
+            display: none;
+        }        
+
+        .page-header {
+            /*background-color: lightgray;*/
+            padding: 4px 8px;
+        }
+
+        .page-content {
+            padding: 8px;
+        }
+
+        .onoffswitch {
+            position: relative; width: 55px;
+            margin: 4px 16px 0 0;
+            -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+            float: right;
+        }
+
+        .onoffswitch-checkbox {
+            display: none;
+        }
+
+        .onoffswitch-label {
+            display: block; overflow: hidden; cursor: pointer;
+            height: 20px; padding: 0; line-height: 20px;
+            border: 0px solid #FFFFFF; border-radius: 30px;
+            background-color: #9E9E9E;
+        }
+
+        .onoffswitch-label:before {
+            content: "";
+            display: block; width: 30px; margin: -5px;
+            background: #FFFFFF;
+            position: absolute; top: 0; bottom: 0;
+            right: 31px;
+            border-radius: 30px;
+            box-shadow: 0 6px 12px 0px #757575;
+        }
+
+        .onoffswitch-checkbox:checked + .onoffswitch-label {
+            background-color: #CDDC39;
+        }
+
+        .onoffswitch-checkbox:checked + .onoffswitch-label, .onoffswitch-checkbox:checked + .onoffswitch-label:before {
+            border-color: #CDDC39;
+        }
+
+        .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+            margin-left: 0;
+        }
+        
+        .onoffswitch-checkbox:checked + .onoffswitch-label:before {
+            right: 0px;
+            background-color: #CDDC39;
+            box-shadow: 3px 6px 18px 0px rgba(0, 0, 0, 0.2);    
+        }    
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="appbar">
+            <div class="logo">
+                <h1>PM5 Monitor</h1>
+            </div>
+        </div>
+        <div class="toolbar">
+            <nav class="navigation">
+                <ul class="navigation__items">
+                    <li class="navigation__item navigation__item_selected" data-target-page="monitor">Monitor</li>
+                    <li class="navigation__item" data-target-page="logbook">Logbook</li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="content">        
+        <div class="page page_active" data-page="monitor">
+            <div class="page-header">
+                <div id="status" class="status">Disconnected</div>            
+                <div class="onoffswitch">
+                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch">
+                    <label class="onoffswitch-label" for="myonoffswitch"></label>
+                </div>        
+            </div>        
+            <div class="page-content">
+                <div class="metrics">
+                    <div class="metric-box">
+                        <h2 class="metric-box__title">Time:</h2>
+                        <div class="metric-box__metric"><span id="time">00:00:00</span></div>
+                    </div>
+                    <div class="metric-box">
+                        <h2 class="metric-box__title">Distance:</h2>
+                        <div class="metric-box__metric"><span id="distance">0.0</span>m</div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    <h3>Instructions</h3>
+                    <div>
+                        <p>
+                            In Chrome 56 or later, go to <em>chrome://flags/#enable-experimental-web-platform-features</em>
+                            otherwise go to <em>chrome://flags/#enable-web-bluetooth</em>
+                        </p>                    
+                        <p>
+                            On the PM5 monitor, go to More Options > Enable Wireless to enable Bluetooth connections.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page" data-page="logbook">
+            <table class="logbook-records">
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Distance</th>                                        
+                </tr>             
+            </table>
+            <div class="no-workout">
+                <h2>You don't have any workouts yet</h2>
+            </div>
+        </div>
+    </div>
+    <template id="logbook-record">
+        <tr class="logentry">
+            <td class="logentry__date">2016-12-05 9:30</td>
+            <td class="logentry__time">12:45:15</td>
+            <td class="logentry__distance">2000m</td>
+        </tr>
+    </template> 
+</body>
+</html>
