@@ -1,11 +1,19 @@
-# PM5 Monitor
+# Rowing Monitor
 
-The PM5 Monitor is a [Progressive Web App](https://developers.google.com/web/#progressive-web-apps)
+The Rowing Monitor is a [Progressive Web App](https://developers.google.com/web/#progressive-web-apps)
 that uses [Web Bluetooth](https://webbluetoothcg.github.io/web-bluetooth/) to connect to a 
 [PM5 Monitor](http://www.concept2.com/service/monitors/pm5) and tracking exercises.
 
 It uses [IndexedDB](https://developer.mozilla.org/en/docs/Web/API/IndexedDB_API) to save exercises
 to a logbook.
+
+![Screenshot](docs/pm5-screenshot.png)
+
+## Running the project
+
+- Fork and clone
+- `npm i`
+- `gulp serve`
 
 ## How it works
 
