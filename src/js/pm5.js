@@ -94,6 +94,7 @@ export default class PM5 {
       .then(device => {
         this.device = device;
         this.device.addEventListener('gattserverdisconnected', () => {
+          this.idObjectMap.clear();
           this.eventTarget.dispatchEvent({type: 'disconnect'});
         });
         return device.gatt.connect();
@@ -105,7 +106,6 @@ export default class PM5 {
   }
 
   disconnect() {
-    this.idObjectMap.clear();
     if (!this.device || !this.device.gatt) {
       return Promise.resolve();
     }
