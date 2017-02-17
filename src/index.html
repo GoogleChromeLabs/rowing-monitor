@@ -15,7 +15,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
     <title>PM5 Monitor</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0097A7">    
@@ -107,11 +107,22 @@
 
         .page {
             width: 100%;
-            display: none;
+            position: absolute;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .page_left {
+            left: -100vw;
+        }
+
+        .page_right {
+            left: 100vw;
         }
 
         .page_active {
-            display: block;
+            left: 0vw;
+            opacity: 1;
         }
 
         .logbook-records {
@@ -202,7 +213,7 @@
         </div>
     </header>
     <div class="content">        
-        <div class="page page_active" data-page="monitor">
+        <div class="page page_left page_active" data-page="monitor">
             <div class="page-header">
                 <div id="status" class="status">Disconnected</div>            
                 <div class="onoffswitch">
@@ -231,7 +242,7 @@
                 </div>
             </div>
         </div>
-        <div class="page" data-page="logbook">
+        <div class="page page_right" data-page="logbook">
             <table class="logbook-records">
                 <tr>
                     <th>Date</th>
@@ -251,14 +262,12 @@
             <td class="logentry__distance">2000m</td>
         </tr>
     </template>
-    <script type="text/javascript">
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
+    <script>
+        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};
         ga('create', 'UA-91288413-2', 'auto');
+        ga('set', 'transport', 'beacon');
         ga('send', 'pageview');
-    </script>    
+    </script>
+    <script async src="https://www.google-analytics.com/analytics.js"></script>    
 </body>
 </html>

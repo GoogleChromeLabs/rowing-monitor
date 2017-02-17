@@ -242,12 +242,13 @@ export default class PM5 {
   }
 
   _getStringCharacteristicValue(characteristic) {
+    const decoder = new TextDecoder('utf-8');
     return this._getCharacteristic(characteristic)
       .then(c => {
         return c.readValue();
       })
       .then(value => {
-        return String.fromCharCode.apply(null, new Uint8Array(value.buffer));
+        return decoder.decode(value);
       });
   }
 

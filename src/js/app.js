@@ -44,12 +44,12 @@ class App {
     });
 
     const tabs = document.querySelectorAll('.navigation__item');
+    const pages = document.querySelectorAll('.page');
     for (let tab of tabs) {
       tab.addEventListener('click', e => {
         const newTab = e.target;
         let newPage;
 
-        const pages = document.querySelectorAll('.page');
         for (let page of pages) {
           if (page.getAttribute('data-page') === newTab.getAttribute('data-target-page')) {
             newPage = page;
