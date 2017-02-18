@@ -126,13 +126,13 @@ class App {
         return this.pm5.addEventListener('disconnect', () => {
           this.btOnOffSwitch.checked = false;
           this.statusText.textContent = 'Disconnected';
+          screen.keepAwake = false;
         });
       });
   }
 
   disconnect() {
     this.pm5.disconnect();
-    screen.keepAwake = false;
   }
 
   _addWorkout(workoutTable, rowtemplate, workout) {
