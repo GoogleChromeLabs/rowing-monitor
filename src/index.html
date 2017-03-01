@@ -30,6 +30,11 @@
             overflow: hidden;
         }
         
+        a, a:hover, a:visited {
+            text-decoration: none;
+            color: white;
+        }
+
         body,
         h1 {
             margin: 0;
@@ -51,10 +56,21 @@
         .navigation__item {
             width: 100px;
             text-align: center;
-            padding: 24px 4px 0px;
             height: 56px;
+            display: flex;
         }
         
+        .navigation__item a {
+            width: 100%;
+            line-height: 56px;
+            transition: background 100ms ease-in;
+        }
+
+        .navigation__item a:active {
+            /*<!--background: #00B9D1;-->*/
+            background: #00A4BD;
+        }
+
         .navigation__item_selected {
             font-weight: bold;
             border-bottom: 4px solid #CDDC39;
@@ -211,8 +227,12 @@
         <div class="toolbar">
             <nav class="navigation">
                 <ul class="navigation__items">
-                    <li class="navigation__item navigation__item_selected" data-target-page="monitor">Monitor</li>
-                    <li class="navigation__item" data-target-page="logbook">Logbook</li>
+                    <li class="navigation__item navigation__item_selected" data-target-page="monitor">
+                        <a href="#">Monitor</a>
+                    </li>
+                    <li class="navigation__item" data-target-page="logbook">
+                        <a href="#">Logbook</a>
+                    </li>
                 </ul>
             </nav>
         </div>

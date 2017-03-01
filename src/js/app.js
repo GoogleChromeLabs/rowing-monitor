@@ -46,8 +46,10 @@ class App {
     const tabs = document.querySelectorAll('.navigation__item');
     const pages = document.querySelectorAll('.page');
     for (let tab of tabs) {
-      tab.addEventListener('click', e => {
-        const newTab = e.target;
+      const anchor = tab.querySelector('a');
+      anchor.addEventListener('click', e => {
+        e.preventDefault();
+        const newTab = tab;
         let newPage;
 
         for (let page of pages) {
@@ -66,6 +68,7 @@ class App {
           this.currentPage = newPage;
           this.selectedTab = newTab;
         }
+        return false;
       });
     }
 
