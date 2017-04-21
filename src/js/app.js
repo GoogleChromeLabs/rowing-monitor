@@ -141,7 +141,7 @@ class App {
   _addWorkout(workoutTable, rowtemplate, workout) {
     rowtemplate.querySelector('.logentry__date').textContent = formatDate(workout.date);
     rowtemplate.querySelector('.logentry__time').textContent =
-        formatTime(new Date(workout.timeElapsed * 1000));
+      formatTime(new Date(workout.timeElapsed * 1000));
     rowtemplate.querySelector('.logentry__distance').textContent = workout.distance;
     const clone = document.importNode(rowtemplate, true);
     workoutTable.appendChild(clone);
@@ -162,9 +162,11 @@ class App {
 
         const rowtemplate = document.querySelector('#logbook-record').content;
         const workoutTable = document.querySelector('.logbook-records');
-        workouts.forEach(workout => {
-          this._addWorkout(workoutTable, rowtemplate, workout);
-        });
+        workouts
+          .sort((workoutA, workoutB) => workoutB.date - workoutA.date)
+          .forEach(workout => {
+            this._addWorkout(workoutTable, rowtemplate, workout);
+          });
         const noWorkout = document.querySelector('.no-workout');
         noWorkout.classList.add('no-workout_hidden');
       });
