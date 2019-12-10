@@ -50,38 +50,38 @@ export default class Logbook {
 
   loadWorkouts() {
     return this._getDatabase()
-      .then(db => {
-        const transaction = db.transaction(LOGBOOK_DATASTORE);
-        const objectStore = transaction.objectStore(LOGBOOK_DATASTORE);
-        const logbookRecords = [];
-        return new Promise(resolve => {
-          objectStore.openCursor().onsuccess = e => {
-            const cursor = e.target.result;
-            if (cursor) {
-              logbookRecords.push(cursor.value);
-              cursor.continue();
-            } else {
-              return resolve(logbookRecords);
-            }
-          };
+        .then(db => {
+          const transaction = db.transaction(LOGBOOK_DATASTORE);
+          const objectStore = transaction.objectStore(LOGBOOK_DATASTORE);
+          const logbookRecords = [];
+          return new Promise(resolve => {
+            objectStore.openCursor().onsuccess = e => {
+              const cursor = e.target.result;
+              if (cursor) {
+                logbookRecords.push(cursor.value);
+                cursor.continue();
+              } else {
+                return resolve(logbookRecords);
+              }
+            };
+          });
         });
-      });
   }
 
   saveWorkout(workout) {
     return this._getDatabase()
-      .then(db => {
-        return new Promise((resolve, reject) => {
-          const transaction = db.transaction([LOGBOOK_DATASTORE], 'readwrite');
-          transaction.oncomplete = () => {
-            return resolve(workout);
-          };
-          transaction.onerror = err => {
-            return reject(err);
-          };
-          const logbook = transaction.objectStore(LOGBOOK_DATASTORE);
-          logbook.add(workout);
+        .then(db => {
+          return new Promise((resolve, reject) => {
+            const transaction = db.transaction([LOGBOOK_DATASTORE], 'readwrite');
+            transaction.oncomplete = () => {
+              return resolve(workout);
+            };
+            transaction.onerror = err => {
+              return reject(err);
+            };
+            const logbook = transaction.objectStore(LOGBOOK_DATASTORE);
+            logbook.add(workout);
+          });
         });
-      });
   }
 }
