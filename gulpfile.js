@@ -20,7 +20,6 @@ const serve = require('gulp-serve');
 const swPrecache = require('sw-precache');
 const path = require('path');
 const htmlmin = require('gulp-htmlmin');
-const runSequence = require('run-sequence');
 const rev = require('gulp-rev');
 const revReplace = require('gulp-rev-replace');
 const revdel = require('gulp-rev-delete-original');
@@ -51,7 +50,7 @@ gulp.task('rollup', () => {
   const uglify = require('rollup-plugin-uglify');
   const nodeResolve = require('rollup-plugin-node-resolve');
   const commonsjs = require('rollup-plugin-commonjs');
-  rollup.rollup({
+  return rollup.rollup({
     entry: './src/js/app.js',
     format: 'iife',
     plugins: [
@@ -117,20 +116,7 @@ gulp.task('deploy', () => {
 
 });
 
-gulp.task('build', () => {
-  runSequence(
-    'clean',
-    ['rollup', 'static', 'minify'],
-     'generate-service-worker');
-});
-
-gulp.task('dist', () => {
-  runSequence(
-    'eslint',
-    'clean',
-    ['rollup', 'static', 'minify'],
-     'rev',
-     'generate-service-worker');
-});
-
-gulp.task('serve', ['build'], serve('dist/'));
+gulp.task('build', gulp.series('clean', 'rollup', 'static', 'minify', 'generate-service-worker'));
+gulp.task('dist',
+    gulp.series('clean', 'rollup', 'static', 'minify', 'rev', 'generate-service-worker'));
+gulp.task('serve', gulp.series('build'), serve('dist/'));
