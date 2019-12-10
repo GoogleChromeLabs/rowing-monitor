@@ -34,10 +34,10 @@ class App {
     this.btOnOffSwitch.addEventListener('change', event => {
       if (event.target.checked) {
         this.connect()
-          .catch(err => {
-            console.log('Connection failed:', err);
-            event.target.checked = false;
-          });
+            .catch(err => {
+              console.log('Connection failed:', err);
+              event.target.checked = false;
+            });
       } else {
         this.disconnect();
       }
@@ -45,14 +45,14 @@ class App {
 
     const tabs = document.querySelectorAll('.navigation__item');
     const pages = document.querySelectorAll('.page');
-    for (let tab of tabs) {
+    for (const tab of tabs) {
       const anchor = tab.querySelector('a');
       anchor.addEventListener('click', e => {
         e.preventDefault();
         const newTab = tab;
         let newPage;
 
-        for (let page of pages) {
+        for (const page of pages) {
           if (page.getAttribute('data-page') === newTab.getAttribute('data-target-page')) {
             newPage = page;
             break;
@@ -92,7 +92,7 @@ class App {
 
   connect() {
     return this.pm5.connect()
-      .then(() => {
+        .then(() => {
         // The call bellow is an experimental API, documented here:
         // https://github.com/w3c/wake-lock.
         // According to this comment on the following issue:
@@ -100,38 +100,38 @@ class App {
         // in Chrome behind an experimental, which seems to be:
         // chrome://flags/#enable-experimental-web-platform-features.
         // The same flag currently used to enable web-bluetooth.
-        screen.keepAwake = true;
-        return this.pm5.getPm5Information();
-      }).then(information => {
-        this.statusText.textContent = 'Connected to: ' + information.serialNumber;
-        this.btOnOffSwitch.checked = true;
-        return this.pm5.addEventListener('general-status', evt => {
-          const date = new Date(evt.data.timeElapsed * 1000);
-          this.timeText.textContent = formatTime(date);
-          this.distanceText.textContent = (evt.data.distance).toFixed(2);
+          screen.keepAwake = true;
+          return this.pm5.getPm5Information();
+        }).then(information => {
+          this.statusText.textContent = 'Connected to: ' + information.serialNumber;
+          this.btOnOffSwitch.checked = true;
+          return this.pm5.addEventListener('general-status', evt => {
+            const date = new Date(evt.data.timeElapsed * 1000);
+            this.timeText.textContent = formatTime(date);
+            this.distanceText.textContent = (evt.data.distance).toFixed(2);
+          });
+        })
+        .then(() => {
+          return this.pm5.addEventListener('workout-end', evt => {
+            this.logbook.saveWorkout(evt.data)
+                .then(workout => {
+                  this.addWorkout(workout);
+                  // TODO: Show Toast here!
+                  console.log('Workout Saved');
+                })
+                .catch(err => {
+                  // TODO: Show Toast here!
+                  console.error('Error Saving Workout', err);
+                });
+          });
+        })
+        .then(() => {
+          return this.pm5.addEventListener('disconnect', () => {
+            this.btOnOffSwitch.checked = false;
+            this.statusText.textContent = 'Disconnected';
+            screen.keepAwake = false;
+          });
         });
-      })
-      .then(() => {
-        return this.pm5.addEventListener('workout-end', evt => {
-          this.logbook.saveWorkout(evt.data)
-            .then(workout => {
-              this.addWorkout(workout);
-              // TODO: Show Toast here!
-              console.log('Workout Saved');
-            })
-            .catch(err => {
-              // TODO: Show Toast here!
-              console.error('Error Saving Workout', err);
-            });
-        });
-      })
-      .then(() => {
-        return this.pm5.addEventListener('disconnect', () => {
-          this.btOnOffSwitch.checked = false;
-          this.statusText.textContent = 'Disconnected';
-          screen.keepAwake = false;
-        });
-      });
   }
 
   disconnect() {
@@ -155,21 +155,21 @@ class App {
 
   fillLogbook() {
     this.logbook.loadWorkouts()
-      .then(workouts => {
-        if (workouts.length <= 0) {
-          return;
-        }
+        .then(workouts => {
+          if (workouts.length <= 0) {
+            return;
+          }
 
-        const rowtemplate = document.querySelector('#logbook-record').content;
-        const workoutTable = document.querySelector('.logbook-records');
-        workouts
-          .sort((workoutA, workoutB) => workoutB.date - workoutA.date)
-          .forEach(workout => {
-            this._addWorkout(workoutTable, rowtemplate, workout);
-          });
-        const noWorkout = document.querySelector('.no-workout');
-        noWorkout.classList.add('no-workout_hidden');
-      });
+          const rowtemplate = document.querySelector('#logbook-record').content;
+          const workoutTable = document.querySelector('.logbook-records');
+          workouts
+              .sort((workoutA, workoutB) => workoutB.date - workoutA.date)
+              .forEach(workout => {
+                this._addWorkout(workoutTable, rowtemplate, workout);
+              });
+          const noWorkout = document.querySelector('.no-workout');
+          noWorkout.classList.add('no-workout_hidden');
+        });
   }
 }
 

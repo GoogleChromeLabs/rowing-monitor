@@ -71,7 +71,7 @@ export default class PM5 {
 
   addEventListener(type, callback) {
     this.eventTarget.addEventListener(type, callback);
-    switch(type) {
+    switch (type) {
       case 'general-status': {
         return this._addGeneralStatusListener();
       }
@@ -87,22 +87,22 @@ export default class PM5 {
 
   connect() {
     if (!navigator.bluetooth) {
-      return Promise.reject('Bluetooth API not available');
+      return Promise.reject(new Error('Bluetooth API not available'));
     }
 
     return navigator.bluetooth.requestDevice(this.filters)
-      .then(device => {
-        this.device = device;
-        this.device.addEventListener('gattserverdisconnected', () => {
-          this.idObjectMap.clear();
-          this.eventTarget.dispatchEvent({type: 'disconnect'});
+        .then(device => {
+          this.device = device;
+          this.device.addEventListener('gattserverdisconnected', () => {
+            this.idObjectMap.clear();
+            this.eventTarget.dispatchEvent({type: 'disconnect'});
+          });
+          return device.gatt.connect();
+        })
+        .then(server => {
+          this.server = server;
+          return Promise.resolve();
         });
-        return device.gatt.connect();
-      })
-      .then(server => {
-        this.server = server;
-        return Promise.resolve();
-      });
   }
 
   disconnect() {
@@ -123,10 +123,10 @@ export default class PM5 {
     }
 
     return this.server.getPrimaryService(service.id)
-      .then(s => {
-        this.idObjectMap.set(service.id, s);
-        return Promise.resolve(s);
-      });
+        .then(s => {
+          this.idObjectMap.set(service.id, s);
+          return Promise.resolve(s);
+        });
   }
 
   _getCharacteristic(characteristic) {
@@ -136,27 +136,27 @@ export default class PM5 {
     }
 
     return this._getService(characteristic.service)
-      .then(service => {
-        return service.getCharacteristic(characteristic.id);
-      })
-      .then(c => {
-        this.idObjectMap.set(characteristic.id, c);
-        return Promise.resolve(c);
-      });
+        .then(service => {
+          return service.getCharacteristic(characteristic.id);
+        })
+        .then(c => {
+          this.idObjectMap.set(characteristic.id, c);
+          return Promise.resolve(c);
+        });
   }
 
   _setupCharacteristicValueListener(characteristic, callback) {
     const pm5 = this;
     return this._getCharacteristic(characteristic)
-      .then(c => {
-        return c.startNotifications();
-      })
-      .then(c => {
-        c.addEventListener('characteristicvaluechanged', e => {
-          callback(pm5, e);
+        .then(c => {
+          return c.startNotifications();
+        })
+        .then(c => {
+          c.addEventListener('characteristicvaluechanged', e => {
+            callback(pm5, e);
+          });
+          return Promise.resolve();
         });
-        return Promise.resolve();
-      });
   }
 
   /**
@@ -186,70 +186,70 @@ export default class PM5 {
    */
   _addWorkoutEndListener() {
     return this._setupCharacteristicValueListener(
-      characteristics.rowingService.workoutEndSummary, (pm5, e) => {
-        const valueArray = new Uint8Array(e.target.value.buffer);
-        const logEntryDate = valueArray[0] + valueArray[1] * MID_MULTIPLIER;
-        const logEntryTime = valueArray[2] + valueArray[3] * MID_MULTIPLIER;
-        const timeElapsed = (valueArray[4] + (valueArray[5] * MID_MULTIPLIER)
-            + (valueArray[6] * HIGH_MULTIPLIER)) * 0.01;
-        const distance = (valueArray[7] + (valueArray[8] * MID_MULTIPLIER)
-            + (valueArray[9] * HIGH_MULTIPLIER)) * 0.1;
-        const averagePace = (valueArray[18] + valueArray[19] * MID_MULTIPLIER) * 0.1;
-        const event = {
-          type: 'workout-end',
-          source: pm5,
-          raw: e.target.value,
-          data: {
-            date: new Date(),
-            logEntryDate: logEntryDate,
-            logEntryTime: logEntryTime,
-            timeElapsed: timeElapsed,
-            distance: distance,
-            avgStrokeRate: valueArray[10],
-            endingHeartRate: valueArray[11],
-            averageHeartRate: valueArray[12],
-            minHeartRate: valueArray[13],
-            maxHeartRate: valueArray[14],
-            averageDragFactor: valueArray[15],
-            recoveryHeartRate: valueArray[16],
-            workoutType: valueArray[17],
-            averagePace: averagePace
-          }
-        };
-        pm5.eventTarget.dispatchEvent(event);
-      });
+        characteristics.rowingService.workoutEndSummary, (pm5, e) => {
+          const valueArray = new Uint8Array(e.target.value.buffer);
+          const logEntryDate = valueArray[0] + valueArray[1] * MID_MULTIPLIER;
+          const logEntryTime = valueArray[2] + valueArray[3] * MID_MULTIPLIER;
+          const timeElapsed = (valueArray[4] + (valueArray[5] * MID_MULTIPLIER) +
+            (valueArray[6] * HIGH_MULTIPLIER)) * 0.01;
+          const distance = (valueArray[7] + (valueArray[8] * MID_MULTIPLIER) +
+            (valueArray[9] * HIGH_MULTIPLIER)) * 0.1;
+          const averagePace = (valueArray[18] + valueArray[19] * MID_MULTIPLIER) * 0.1;
+          const event = {
+            type: 'workout-end',
+            source: pm5,
+            raw: e.target.value,
+            data: {
+              date: new Date(),
+              logEntryDate: logEntryDate,
+              logEntryTime: logEntryTime,
+              timeElapsed: timeElapsed,
+              distance: distance,
+              avgStrokeRate: valueArray[10],
+              endingHeartRate: valueArray[11],
+              averageHeartRate: valueArray[12],
+              minHeartRate: valueArray[13],
+              maxHeartRate: valueArray[14],
+              averageDragFactor: valueArray[15],
+              recoveryHeartRate: valueArray[16],
+              workoutType: valueArray[17],
+              averagePace: averagePace
+            }
+          };
+          pm5.eventTarget.dispatchEvent(event);
+        });
   }
 
   _addGeneralStatusListener() {
     return this._setupCharacteristicValueListener(
-      characteristics.rowingService.generalStatus, (pm5, e) => {
-        const valueArray = new Uint8Array(e.target.value.buffer);
-        const timeElapsed = (valueArray[0] + (valueArray[1] * MID_MULTIPLIER)
-            + (valueArray[2] * HIGH_MULTIPLIER)) * 0.01;
-        const distance = (valueArray[3] + (valueArray[4] * MID_MULTIPLIER)
-            + (valueArray[5] * HIGH_MULTIPLIER)) * 0.1;
-        const event = {
-          type: 'general-status',
-          source: pm5,
-          raw: e.target.value,
-          data: {
-            distance: distance,
-            timeElapsed: timeElapsed
-          }
-        };
-        pm5.eventTarget.dispatchEvent(event);
-      });
+        characteristics.rowingService.generalStatus, (pm5, e) => {
+          const valueArray = new Uint8Array(e.target.value.buffer);
+          const timeElapsed = (valueArray[0] + (valueArray[1] * MID_MULTIPLIER) +
+            (valueArray[2] * HIGH_MULTIPLIER)) * 0.01;
+          const distance = (valueArray[3] + (valueArray[4] * MID_MULTIPLIER) +
+            (valueArray[5] * HIGH_MULTIPLIER)) * 0.1;
+          const event = {
+            type: 'general-status',
+            source: pm5,
+            raw: e.target.value,
+            data: {
+              distance: distance,
+              timeElapsed: timeElapsed
+            }
+          };
+          pm5.eventTarget.dispatchEvent(event);
+        });
   }
 
   _getStringCharacteristicValue(characteristic) {
     const decoder = new TextDecoder('utf-8');
     return this._getCharacteristic(characteristic)
-      .then(c => {
-        return c.readValue();
-      })
-      .then(value => {
-        return decoder.decode(value);
-      });
+        .then(c => {
+          return c.readValue();
+        })
+        .then(value => {
+          return decoder.decode(value);
+        });
   }
 
   getFirmwareVersion() {
@@ -271,21 +271,21 @@ export default class PM5 {
   getPm5Information() {
     const pm5Information = {};
     return this.getManufacturerName()
-      .then(manufacturer => {
-        pm5Information.manufacturer = manufacturer;
-        return this.getHardwareRevision();
-      })
-      .then(hwVersion => {
-        pm5Information.hwVersion = hwVersion;
-        return this.getSerialNumber();
-      })
-      .then(serialNumber => {
-        pm5Information.serialNumber = serialNumber;
-        return this.getFirmwareVersion();
-      })
-      .then(firmwareVersion => {
-        pm5Information.firmwareVersion = firmwareVersion;
-        return Promise.resolve(pm5Information);
-      });
+        .then(manufacturer => {
+          pm5Information.manufacturer = manufacturer;
+          return this.getHardwareRevision();
+        })
+        .then(hwVersion => {
+          pm5Information.hwVersion = hwVersion;
+          return this.getSerialNumber();
+        })
+        .then(serialNumber => {
+          pm5Information.serialNumber = serialNumber;
+          return this.getFirmwareVersion();
+        })
+        .then(firmwareVersion => {
+          pm5Information.firmwareVersion = firmwareVersion;
+          return Promise.resolve(pm5Information);
+        });
   }
 }
