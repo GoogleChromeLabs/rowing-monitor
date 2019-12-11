@@ -44,50 +44,45 @@ gulp.task('clean', () => {
   return del('dist');
 });
 
-gulp.task('rollup', () => {
+gulp.task('rollup', async () => { 
   const rollup = require('rollup');
   const babel = require('rollup-plugin-babel');
-  const uglify = require('rollup-plugin-uglify');
+  const uglify = require('rollup-plugin-uglify-es');
   const nodeResolve = require('rollup-plugin-node-resolve');
   const commonsjs = require('rollup-plugin-commonjs');
-  return rollup.rollup({
-    entry: './src/js/app.js',
-    format: 'iife',
+  const bundle = await rollup.rollup({
+    input: './src/js/app.js',
     plugins: [
       nodeResolve(),
       commonsjs(),
       babel(),
-      uglify()
+      uglify(),
     ]
-  })
-  .then(bundle => {
-    bundle.write({
-      sourceMap: true,
-      // useStrict: false,
-      format: 'iife',
-      dest: 'dist/js/app.js'
-    });
+  });
+  bundle.write({
+    sourceMap: true,
+    // useStrict: false,
+    format: 'iife',
+    file: 'dist/js/app.js'
   });
 });
 
 gulp.task('minify', () => {
-  return gulp.src('src/**/*.html')
-    .pipe(htmlmin({
-      removeComments: true,
-      collapseWhitespace: true,
-      collapseBooleanAttributes: true,
-      removeAttributeQuotes: true,
-      removeEmptyAttributes: true,
-      minifyJS: true,
-      minifyCSS: true
-    }))
-    .pipe(gulp.dest('dist'));
+  return gulp.src('src/**/*.html').pipe(htmlmin({
+    removeComments: true,
+    collapseWhitespace: true,
+    collapseBooleanAttributes: true,
+    removeAttributeQuotes: true,
+    removeEmptyAttributes: true,
+    minifyJS: true,
+    minifyCSS: true
+  })).pipe(gulp.dest('dist'));
 });
 
 gulp.task('eslint', () => {
   return gulp.src(['src/**/*.js'])
-    .pipe(eslint())
-    .pipe(eslint.format());
+      .pipe(eslint())
+      .pipe(eslint.format());
 });
 /**
  * Creates file revisions
@@ -96,20 +91,20 @@ gulp.task('rev', () => {
   const jsFilter = filter(['dist/js/*.js'], {restore: true});
   const indexFilter = filter(['dist/index.html'], {restore: true});
   return gulp.src(['dist/**/*.*'])
-    .pipe(useref())
-    .pipe(jsFilter)
-    .pipe(rev())
-    .pipe(revdel())
-    .pipe(gulp.dest('dist'))
-    .pipe(jsFilter.restore)
-    .pipe(revReplace())
-    .pipe(indexFilter)
-    .pipe(gulp.dest('dist'));
+      .pipe(useref())
+      .pipe(jsFilter)
+      .pipe(rev())
+      .pipe(revdel())
+      .pipe(gulp.dest('dist'))
+      .pipe(jsFilter.restore)
+      .pipe(revReplace())
+      .pipe(indexFilter)
+      .pipe(gulp.dest('dist'));
 });
 
 gulp.task('static', () => {
   return gulp.src(['src/**/*.*', '!src/**/*.js', '!src/**/*.html'])
-    .pipe(gulp.dest('dist'));
+      .pipe(gulp.dest('dist'));
 });
 
 gulp.task('deploy', () => {

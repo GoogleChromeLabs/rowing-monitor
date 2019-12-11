@@ -85,78 +85,60 @@ export default class PM5 {
     return this.eventTarget.removeEventListener(type, callback);
   }
 
-  connect() {
+  async connect() {
     if (!navigator.bluetooth) {
-      return Promise.reject(new Error('Bluetooth API not available'));
+      throw new Error('Bluetooth API not available');
     }
 
-    return navigator.bluetooth.requestDevice(this.filters)
-        .then(device => {
-          this.device = device;
-          this.device.addEventListener('gattserverdisconnected', () => {
-            this.idObjectMap.clear();
-            this.eventTarget.dispatchEvent({type: 'disconnect'});
-          });
-          return device.gatt.connect();
-        })
-        .then(server => {
-          this.server = server;
-          return Promise.resolve();
-        });
+    this.device = await navigator.bluetooth.requestDevice(this.filters);
+    this.device.addEventListener('gattserverdisconnected', () => {
+      this.idObjectMap.clear();
+      this.eventTarget.dispatchEvent({type: 'disconnect'});
+    });
+    this.server = await device.gatt.connect();
   }
 
-  disconnect() {
+  async disconnect() {
     if (!this.device || !this.device.gatt) {
-      return Promise.resolve();
+      return;
     }
-    return this.device.gatt.disconnect();
+    return await this.device.gatt.disconnect();
   }
 
   get connected() {
     return this.device && this.device.gatt.connected;
   }
 
-  _getService(service) {
+  async _getService(service) {
     const serviceObject = this.idObjectMap.get(service.id);
     if (serviceObject) {
-      return Promise.resolve(serviceObject);
+      return serviceObject;
     }
 
-    return this.server.getPrimaryService(service.id)
-        .then(s => {
-          this.idObjectMap.set(service.id, s);
-          return Promise.resolve(s);
-        });
+    const s = await this.server.getPrimaryService(service.id);
+    this.idObjectMap.set(service.id, s);
+    return s;
   }
 
-  _getCharacteristic(characteristic) {
+  async _getCharacteristic(characteristic) {
     const characteristicObject = this.idObjectMap.get(characteristic.id);
     if (characteristicObject) {
-      return Promise.resolve(characteristicObject);
+      return characteristicObject;
     }
 
-    return this._getService(characteristic.service)
-        .then(service => {
-          return service.getCharacteristic(characteristic.id);
-        })
-        .then(c => {
-          this.idObjectMap.set(characteristic.id, c);
-          return Promise.resolve(c);
-        });
+    const service = await this._getService(characteristic.service);
+    const c = await service.getCharacteristic(characteristic.id);
+    this.idObjectMap.set(characteristic.id, c);
+    return c;
   }
 
-  _setupCharacteristicValueListener(characteristic, callback) {
+  async _setupCharacteristicValueListener(characteristic, callback) {
     const pm5 = this;
-    return this._getCharacteristic(characteristic)
-        .then(c => {
-          return c.startNotifications();
-        })
-        .then(c => {
-          c.addEventListener('characteristicvaluechanged', e => {
-            callback(pm5, e);
-          });
-          return Promise.resolve();
-        });
+    const c = await this._getCharacteristic(characteristic);
+    await c.startNotifications();
+    c.addEventListener('characteristicvaluechanged', e => {
+      callback(pm5, e);
+    });
   }
 
   /**
@@ -241,51 +223,44 @@ export default class PM5 {
         });
   }
 
-  _getStringCharacteristicValue(characteristic) {
+  async _getStringCharacteristicValue(characteristic) {
     const decoder = new TextDecoder('utf-8');
-    return this._getCharacteristic(characteristic)
-        .then(c => {
-          return c.readValue();
-        })
-        .then(value => {
-          return decoder.decode(value);
-        });
+    const c = await this._getCharacteristic(characteristic);
+    const value = await c.readValue();
+    return decoder.decode(value);
   }
 
-  getFirmwareVersion() {
-    return this._getStringCharacteristicValue(characteristics.informationService.firmwareVersion);
+  async getFirmwareVersion() {
+    return await this._getStringCharacteristicValue(
+        characteristics.informationService.firmwareVersion);
   }
 
-  getHardwareRevision() {
-    return this._getStringCharacteristicValue(characteristics.informationService.hardwareRevision);
+  async getHardwareRevision() {
+    return await this._getStringCharacteristicValue(
+        characteristics.informationService.hardwareRevision);
   }
 
-  getSerialNumber() {
-    return this._getStringCharacteristicValue(characteristics.informationService.serialNumber);
+  async getSerialNumber() {
+    return await this._getStringCharacteristicValue(
+        characteristics.informationService.serialNumber);
   }
 
-  getManufacturerName() {
-    return this._getStringCharacteristicValue(characteristics.informationService.manufacturerName);
+  async getManufacturerName() {
+    return await this._getStringCharacteristicValue(
+        characteristics.informationService.manufacturerName);
   }
 
-  getPm5Information() {
-    const pm5Information = {};
-    return this.getManufacturerName()
-        .then(manufacturer => {
-          pm5Information.manufacturer = manufacturer;
-          return this.getHardwareRevision();
-        })
-        .then(hwVersion => {
-          pm5Information.hwVersion = hwVersion;
-          return this.getSerialNumber();
-        })
-        .then(serialNumber => {
-          pm5Information.serialNumber = serialNumber;
-          return this.getFirmwareVersion();
-        })
-        .then(firmwareVersion => {
-          pm5Information.firmwareVersion = firmwareVersion;
-          return Promise.resolve(pm5Information);
-        });
+  async getPm5Information() {
+    const manufacturer = await this.getManufacturerName();
+    const hwVersion = await this.getHardwareRevision();
+    const serialNumber = await this.getSerialNumber();
+    const firmwareVersion = await this.getFirmwareVersion();
+
+    return {
+      manufacturer: manufacturer,
+      hwVersion: hwVersion,
+      serialNumber: serialNumber,
+      firmwareVersion: firmwareVersion,
+    };
   }
 }

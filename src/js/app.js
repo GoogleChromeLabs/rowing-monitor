@@ -90,52 +90,38 @@ class App {
     }
   }
 
-  connect() {
-    return this.pm5.connect()
-        .then(() => {
-        // The call bellow is an experimental API, documented here:
-        // https://github.com/w3c/wake-lock.
-        // According to this comment on the following issue:
-        // https://github.com/w3c/wake-lock/issues/76#issuecomment-232669584, it's enabled
-        // in Chrome behind an experimental, which seems to be:
-        // chrome://flags/#enable-experimental-web-platform-features.
-        // The same flag currently used to enable web-bluetooth.
-          screen.keepAwake = true;
-          return this.pm5.getPm5Information();
-        }).then(information => {
-          this.statusText.textContent = 'Connected to: ' + information.serialNumber;
-          this.btOnOffSwitch.checked = true;
-          return this.pm5.addEventListener('general-status', evt => {
-            const date = new Date(evt.data.timeElapsed * 1000);
-            this.timeText.textContent = formatTime(date);
-            this.distanceText.textContent = (evt.data.distance).toFixed(2);
+  async connect() {
+    await this.pm5.connect();
+    screen.keepAwake = true;
+    const information = await this.pm5.getPm5Information();
+    this.statusText.textContent = 'Connected to: ' + information.serialNumber;
+    this.btOnOffSwitch.checked = true;
+    this.pm5.addEventListener('general-status', evt => {
+      const date = new Date(evt.data.timeElapsed * 1000);
+      this.timeText.textContent = formatTime(date);
+      this.distanceText.textContent = (evt.data.distance).toFixed(2);
+    });
+    this.pm5.addEventListener('workout-end', evt => {
+      this.logbook.saveWorkout(evt.data)
+          .then(workout => {
+            this.addWorkout(workout);
+            // TODO: Show Toast here!
+            console.log('Workout Saved');
+          })
+          .catch(err => {
+            // TODO: Show Toast here!
+            console.error('Error Saving Workout', err);
           });
-        })
-        .then(() => {
-          return this.pm5.addEventListener('workout-end', evt => {
-            this.logbook.saveWorkout(evt.data)
-                .then(workout => {
-                  this.addWorkout(workout);
-                  // TODO: Show Toast here!
-                  console.log('Workout Saved');
-                })
-                .catch(err => {
-                  // TODO: Show Toast here!
-                  console.error('Error Saving Workout', err);
-                });
-          });
-        })
-        .then(() => {
-          return this.pm5.addEventListener('disconnect', () => {
-            this.btOnOffSwitch.checked = false;
-            this.statusText.textContent = 'Disconnected';
-            screen.keepAwake = false;
-          });
-        });
+    });
+    this.pm5.addEventListener('disconnect', () => {
+      this.btOnOffSwitch.checked = false;
+      this.statusText.textContent = 'Disconnected';
+      screen.keepAwake = false;
+    });
   }
 
-  disconnect() {
-    this.pm5.disconnect();
+  async disconnect() {
+    await this.pm5.disconnect();
   }
 
   _addWorkout(workoutTable, rowtemplate, workout) {
@@ -153,23 +139,21 @@ class App {
     this._addWorkout(workoutTable, rowtemplate, workout);
   }
 
-  fillLogbook() {
-    this.logbook.loadWorkouts()
-        .then(workouts => {
-          if (workouts.length <= 0) {
-            return;
-          }
+  async fillLogbook() {
+    const workouts = await this.logbook.loadWorkouts();
+    if (workouts.length <= 0) {
+      return;
+    }
 
-          const rowtemplate = document.querySelector('#logbook-record').content;
-          const workoutTable = document.querySelector('.logbook-records');
-          workouts
-              .sort((workoutA, workoutB) => workoutB.date - workoutA.date)
-              .forEach(workout => {
-                this._addWorkout(workoutTable, rowtemplate, workout);
-              });
-          const noWorkout = document.querySelector('.no-workout');
-          noWorkout.classList.add('no-workout_hidden');
+    const rowtemplate = document.querySelector('#logbook-record').content;
+    const workoutTable = document.querySelector('.logbook-records');
+    workouts
+        .sort((workoutA, workoutB) => workoutB.date - workoutA.date)
+        .forEach(workout => {
+          this._addWorkout(workoutTable, rowtemplate, workout);
         });
+    const noWorkout = document.querySelector('.no-workout');
+    noWorkout.classList.add('no-workout_hidden');
   }
 }
 

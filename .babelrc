@@ -15,11 +15,12 @@
 {
   "presets": [
     [
-      "env",
+      "@babel/preset-env",
       {
-        "modules": false
+        "targets": {
+          "esmodules": true
+        }
       }
     ]
-  ],
-  "plugins": ["external-helpers"]
+  ]
 }
