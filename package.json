@@ -4,7 +4,8 @@
   "description": "An app to monitor rowing sessions with the PM5 monitor",
   "main": "app.js",
   "scripts": {
-    "lint": "eslint src/js/**/*.js",    
+    "lint": "eslint src/js/**/*.js",
+    "dev": "gulp dev",
     "build": "gulp build"
   },
   "author": "Andre Bandarra",

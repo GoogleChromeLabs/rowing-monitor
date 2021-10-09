@@ -11,9 +11,10 @@ to a logbook.
 
 ## Running the project
 
-- Fork and clone
+- `git clone https://github.com/GoogleChromeLabs/rowing-monitor.git`
+- `cd rowing-monitor`
 - `npm i`
-- `gulp serve`
+- `npm run dev`
 
 ## How it works
 

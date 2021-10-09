@@ -59,8 +59,7 @@ gulp.task('rollup', () => {
       babel(),
       uglify()
     ]
-  })
-  .then(bundle => {
+  }).then(bundle => {
     bundle.write({
       sourceMap: true,
       // useStrict: false,
@@ -72,22 +71,22 @@ gulp.task('rollup', () => {
 
 gulp.task('minify', () => {
   return gulp.src('src/**/*.html')
-    .pipe(htmlmin({
-      removeComments: true,
-      collapseWhitespace: true,
-      collapseBooleanAttributes: true,
-      removeAttributeQuotes: true,
-      removeEmptyAttributes: true,
-      minifyJS: true,
-      minifyCSS: true
-    }))
-    .pipe(gulp.dest('dist'));
+      .pipe(htmlmin({
+        removeComments: true,
+        collapseWhitespace: true,
+        collapseBooleanAttributes: true,
+        removeAttributeQuotes: true,
+        removeEmptyAttributes: true,
+        minifyJS: true,
+        minifyCSS: true
+      }))
+      .pipe(gulp.dest('dist'));
 });
 
 gulp.task('eslint', () => {
   return gulp.src(['src/**/*.js'])
-    .pipe(eslint())
-    .pipe(eslint.format());
+      .pipe(eslint())
+      .pipe(eslint.format());
 });
 /**
  * Creates file revisions
@@ -96,20 +95,20 @@ gulp.task('rev', () => {
   const jsFilter = filter(['dist/js/*.js'], {restore: true});
   const indexFilter = filter(['dist/index.html'], {restore: true});
   return gulp.src(['dist/**/*.*'])
-    .pipe(useref())
-    .pipe(jsFilter)
-    .pipe(rev())
-    .pipe(revdel())
-    .pipe(gulp.dest('dist'))
-    .pipe(jsFilter.restore)
-    .pipe(revReplace())
-    .pipe(indexFilter)
-    .pipe(gulp.dest('dist'));
+      .pipe(useref())
+      .pipe(jsFilter)
+      .pipe(rev())
+      .pipe(revdel())
+      .pipe(gulp.dest('dist'))
+      .pipe(jsFilter.restore)
+      .pipe(revReplace())
+      .pipe(indexFilter)
+      .pipe(gulp.dest('dist'));
 });
 
 gulp.task('static', () => {
   return gulp.src(['src/**/*.*', '!src/**/*.js', '!src/**/*.html'])
-    .pipe(gulp.dest('dist'));
+      .pipe(gulp.dest('dist'));
 });
 
 gulp.task('deploy', () => {
@@ -119,4 +118,6 @@ gulp.task('deploy', () => {
 gulp.task('build', gulp.series('clean', 'rollup', 'static', 'minify', 'generate-service-worker'));
 gulp.task('dist',
     gulp.series('clean', 'rollup', 'static', 'minify', 'rev', 'generate-service-worker'));
-gulp.task('serve', gulp.series('build'), serve('dist/'));
+
+gulp.task('serve', serve('dist/'));
+gulp.task('dev', gulp.series(['build', 'serve']));
