@@ -20,6 +20,7 @@ module.exports = {
     },
     "extends": "google",
     "parserOptions": {
+        "ecmaVersion": 2020,
         "sourceType": "module"
     },
     "rules": {
