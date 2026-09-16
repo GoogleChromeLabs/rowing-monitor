@@ -20,7 +20,7 @@ import Logbook from './logbook';
 import {formatDate, formatTime} from './utils';
 import WebFont from 'webfontloader';
 
-class App {
+export default class App {
   constructor() {
   }
 
@@ -173,5 +173,8 @@ class App {
   }
 }
 
-const app = new App();
-app.setup();
+if (typeof window !== 'undefined' && typeof document !== 'undefined' &&
+    document.querySelector && document.querySelector('#myonoffswitch')) {
+  const app = new App();
+  app.setup();
+}

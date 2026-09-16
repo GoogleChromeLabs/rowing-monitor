@@ -4,6 +4,7 @@
   "description": "An app to monitor rowing sessions with the PM5 monitor",
   "main": "src/js/app.js",
   "scripts": {
+    "test": "node --no-warnings --import ./test/register-loader.js --test \"test/**/*.test.js\"",
     "lint": "eslint src/js/**/*.js",
     "dev": "vite",
     "build": "vite build",
