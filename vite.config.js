@@ -12,14 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{
-  "presets": [
-    [
-      "env",
-      {
-        "modules": false
+
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
+
+export default defineConfig({
+  plugins: [
+    VitePWA({
+      strategies: 'generateSW',
+      filename: 'service-worker.js',
+      manifest: false,
+      injectRegister: false,
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}']
       }
-    ]
+    })
   ],
-  "plugins": ["external-helpers"]
-}
+  build: {
+    outDir: 'dist'
+  }
+});
