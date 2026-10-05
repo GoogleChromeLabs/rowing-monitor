@@ -104,7 +104,7 @@ describe('App', () => {
 
     // Date(65 * 1000) corresponds to 65 seconds
     const expectedTime = app.timeText.textContent;
-    assert.ok(expectedTime.endsWith('01:05'));
+    assert.strictEqual(expectedTime, '00:01:05');
     assert.strictEqual(mockDoc.distanceEl.textContent, '250.50');
   });
 

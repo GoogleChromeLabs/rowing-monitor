@@ -6,19 +6,25 @@ describe('utils', () => {
   describe('formatTime', () => {
     it('formats time with padded hours, minutes, and seconds', () => {
       // 09:05:07
-      const date = new Date(2023, 0, 1, 9, 5, 7);
+      const date = new Date(Date.UTC(2023, 0, 1, 9, 5, 7));
       assert.strictEqual(formatTime(date), '09:05:07');
     });
 
     it('formats double digit hours, minutes, and seconds', () => {
       // 14:30:45
-      const date = new Date(2023, 0, 1, 14, 30, 45);
+      const date = new Date(Date.UTC(2023, 0, 1, 14, 30, 45));
       assert.strictEqual(formatTime(date), '14:30:45');
     });
 
     it('formats midnight as 00:00:00', () => {
-      const date = new Date(2023, 0, 1, 0, 0, 0);
+      const date = new Date(Date.UTC(2023, 0, 1, 0, 0, 0));
       assert.strictEqual(formatTime(date), '00:00:00');
+    });
+
+    it('formats elapsed durations independent of local timezone', () => {
+      assert.strictEqual(formatTime(new Date(5 * 1000)), '00:00:05');
+      assert.strictEqual(formatTime(new Date(90 * 1000)), '00:01:30');
+      assert.strictEqual(formatTime(new Date(3600 * 1000)), '01:00:00');
     });
   });
 
