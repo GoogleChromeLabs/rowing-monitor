@@ -18,9 +18,9 @@
 const LOCALE = 'en-US';
 
 export function formatTime(date) {
-  const hours = date.getHours().toLocaleString(LOCALE, {minimumIntegerDigits: 2});
-  const minutes = date.getMinutes().toLocaleString(LOCALE, {minimumIntegerDigits: 2});
-  const seconds = date.getSeconds().toLocaleString(LOCALE, {minimumIntegerDigits: 2});
+  const hours = date.getUTCHours().toLocaleString(LOCALE, {minimumIntegerDigits: 2});
+  const minutes = date.getUTCMinutes().toLocaleString(LOCALE, {minimumIntegerDigits: 2});
+  const seconds = date.getUTCSeconds().toLocaleString(LOCALE, {minimumIntegerDigits: 2});
   return hours + ':' + minutes + ':' + seconds;
 }
 
